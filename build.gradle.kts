@@ -30,7 +30,7 @@ buildscript {
     }
 }
 
-version = ProjectVersion("1.0.0", BuildType.snapshot)
+version = ProjectVersion("1.0.0", BuildType.release)
 group = "org.cthing"
 description = "A Gradle plugin that establishes the versioning scheme for C Thing Software projects."
 
