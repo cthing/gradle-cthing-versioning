@@ -44,7 +44,7 @@ public class PluginIntegTest {
     public static Stream<Arguments> gradleVersionProvider() {
         return Stream.of(
                 arguments("8.0"),
-                arguments("8.7")
+                arguments("8.8")
         );
     }
 
@@ -102,8 +102,8 @@ public class PluginIntegTest {
                 version = "1.2.3"
                 """);
 
-        final UnexpectedBuildFailure exception = catchThrowableOfType(() -> createGradleRunner(gradleVersion).build(),
-                                                                      UnexpectedBuildFailure.class);
+        final UnexpectedBuildFailure exception = catchThrowableOfType(UnexpectedBuildFailure.class,
+                                                                      () -> createGradleRunner(gradleVersion).build());
         final BuildResult result = exception.getBuildResult();
         assertThat(result.getOutput()).contains("Version is not an instance of org.cthing.projectversion.ProjectVersion");
     }
@@ -141,8 +141,8 @@ public class PluginIntegTest {
                 }
                 """);
 
-        final UnexpectedBuildFailure exception = catchThrowableOfType(() -> createGradleRunner(gradleVersion).build(),
-                                                                      UnexpectedBuildFailure.class);
+        final UnexpectedBuildFailure exception = catchThrowableOfType(UnexpectedBuildFailure.class,
+                                                                      () -> createGradleRunner(gradleVersion).build());
         final BuildResult result = exception.getBuildResult();
         assertThat(result.getOutput()).contains("Release build depends on snapshot artifact org.cthing:versionparser:4.+ (implementation)");
     }
