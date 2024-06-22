@@ -23,7 +23,7 @@ buildscript {
 }
 
 plugins {
-  id("org.cthing.cthing-versioning") version "1.0.0"
+  id("org.cthing.cthing-versioning") version "1.0.1"
 }
 ```
 

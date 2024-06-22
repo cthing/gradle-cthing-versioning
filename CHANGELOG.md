@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [1.0.1] - 2024-06-21
+
+### Changed
+
+- Fix NPE due to dependency with no group name
+
 ## [1.0.0] - 2024-05-30
 
 ### Added
 
 - First release
 
-[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/1.0.0...HEAD
+[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/1.0.1...HEAD
+[1.0.1]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/1.0.1
 [1.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/1.0.0
