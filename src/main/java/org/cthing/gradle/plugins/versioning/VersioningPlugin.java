@@ -74,7 +74,7 @@ public class VersioningPlugin implements Plugin<Project> {
                             for (final Dependency dep : config.getDependencies()) {
                                 final String version = dep.getVersion();
                                 final String group = dep.getGroup();
-                                if (CTHING_GROUPS.contains(group)
+                                if (group != null && CTHING_GROUPS.contains(group)
                                         && (version == null || SNAPHOT_VERSION_PATTERN.matcher(version).matches())) {
                                     proj.getLogger().error(
                                             "Release build depends on snapshot artifact {}:{}:{} ({})",
