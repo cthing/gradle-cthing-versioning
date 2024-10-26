@@ -30,7 +30,7 @@ buildscript {
     }
 }
 
-version = ProjectVersion("1.0.2", BuildType.snapshot)
+version = ProjectVersion("2.0.0", BuildType.snapshot)
 group = "org.cthing"
 description = "A Gradle plugin that establishes the versioning scheme for C Thing Software projects."
 
@@ -61,7 +61,8 @@ gradlePlugin {
 // dependencies, the only C Thing Software project it should depend on is cthing-projectversion.
 dependencies {
     api(libs.cthingProjectVersion)
-    api(libs.jsr305)
+
+    implementation(libs.jspecify)
 
     testImplementation(libs.assertJ)
     testImplementation(libs.junitApi)

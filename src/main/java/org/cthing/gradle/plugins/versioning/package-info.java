@@ -6,7 +6,7 @@
 /**
  * Establishes versioning for C Thing Software projects.
  */
-@ParametersAreNonnullByDefault
+@NullMarked
 package org.cthing.gradle.plugins.versioning;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;
