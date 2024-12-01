@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [3.0.0] - 2024-12-01
+
 ### Added
 
 - The plugin now generates the text file `build/projectversion.txt` containing the
@@ -28,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release
 
-[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/2.0.0...HEAD
+[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/3.0.0...HEAD
+[3.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/3.0.0
 [2.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/2.0.0
 [1.0.1]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/1.0.1
 [1.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/1.0.0

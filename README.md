@@ -29,7 +29,7 @@ buildscript {
 }
 
 plugins {
-  id("org.cthing.cthing-versioning") version "2.0.0"
+  id("org.cthing.cthing-versioning") version "3.0.0"
 }
 ```
 
@@ -39,7 +39,7 @@ The following Gradle and Java versions are supported:
 
 | Plugin Version | Gradle Version | Minimum Java Version |
 |----------------|----------------|----------------------|
-| 2.0.0+         | 8.0+           | 17                   |
+| 3.0.0+         | 8.0+           | 17                   |
 
 ## Building
 
