@@ -9,6 +9,12 @@ enforces the following:
 * The project version is an instance of the ProjectVersion class
 * Release builds do not depend on snapshot versions of C Thing Software artifacts
 
+When applied to the root project, the plugin generates the file `build/projectversion.txt`
+containing the complete semantic version of the project.
+
+The plugin provides the `version` task, which displays the complete semantic version of the
+project on the standard output.
+
 ## Usage
 
 The plugin is available from the

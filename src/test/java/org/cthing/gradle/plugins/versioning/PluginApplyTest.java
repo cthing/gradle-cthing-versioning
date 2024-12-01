@@ -23,6 +23,9 @@ public class PluginApplyTest {
         final Project project = ProjectBuilder.builder().withName("testProject").withProjectDir(projectDir).build();
         project.getPluginManager().apply("org.cthing.cthing-versioning");
 
+        final Task versionFileTask = project.getTasks().findByName("projectVersionFile");
+        assertThat(versionFileTask).isNotNull();
+
         final Task versionTask = project.getTasks().findByName("version");
         assertThat(versionTask).isNotNull();
     }

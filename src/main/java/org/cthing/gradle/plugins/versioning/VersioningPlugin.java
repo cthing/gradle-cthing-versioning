@@ -5,6 +5,12 @@
 
 package org.cthing.gradle.plugins.versioning;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -14,6 +20,8 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.plugins.BasePlugin;
+import org.gradle.api.tasks.TaskExecutionException;
 
 
 /**
@@ -22,6 +30,7 @@ import org.gradle.api.artifacts.Dependency;
  * <pre>
  * version = ProjectVersion("1.2.3", BuildType.snapshot)
  * </pre>
+ *
  * <p>
  * The plugin also enforces that release builds only depend on release versions of C Thing Software
  * artifacts.
@@ -31,13 +40,20 @@ public class VersioningPlugin implements Plugin<Project> {
 
     public static final String VERSION_TASK_NAME = "version";
 
+    private static final String VERSION_FILE_TASK_NAME = "projectVersionFile";
+    private static final String VERSION_FILE_TASK_PATH = ":" + VERSION_FILE_TASK_NAME;
     private static final Pattern SNAPHOT_VERSION_PATTERN = Pattern.compile(".*(?:\\+|-SNAPSHOT|-\\d+)$");
+    private static final String PROJECT_VERSION_FILENAME = "projectversion.txt";
     private static final Set<String> CTHING_GROUPS = Set.of("com.cthing", "org.cthing");
     private static final Set<String> BUILD_CONFIGS = Set.of("api",
                                                             "compileOnly",
                                                             "compileOnlyApi",
                                                             "implementation",
                                                             "runtimeOnly");
+    private static final List<String> BUILD_RELATED_FILES = List.of("gradle.properties",
+                                                                    "settings.gradle",
+                                                                    "settings.gradle.kts",
+                                                                    "gradle/libs.versions.toml");
 
     @Override
     public void apply(final Project project) {
@@ -52,11 +68,11 @@ public class VersioningPlugin implements Plugin<Project> {
             // Validate that a release build only depends on release build internal artifacts.
             validateReleaseDependencies(project);
 
-            project.getTasks().register(VERSION_TASK_NAME, task -> {
-                task.setGroup("Help");
-                task.setDescription("Display project version number");
-                task.doFirst(t -> System.out.println(project.getVersion()));
-            });
+            // Create the task that writes the version file.
+            createVersionFileTask(project);
+
+            // Create the task that displays the version.
+            createVersionTask(project);
         }
     }
 
@@ -76,9 +92,8 @@ public class VersioningPlugin implements Plugin<Project> {
                                 final String group = dep.getGroup();
                                 if (group != null && CTHING_GROUPS.contains(group)
                                         && (version == null || SNAPHOT_VERSION_PATTERN.matcher(version).matches())) {
-                                    proj.getLogger().error(
-                                            "Release build depends on snapshot artifact {}:{}:{} ({})",
-                                            group, dep.getName(), version, config.getName());
+                                    proj.getLogger().error("Release build depends on snapshot artifact {}:{}:{} ({})",
+                                                           group, dep.getName(), version, config.getName());
                                     throw new GradleException("Release build depends on snapshot artifacts");
                                 }
                             }
@@ -87,5 +102,78 @@ public class VersioningPlugin implements Plugin<Project> {
                 }
             }
         });
+    }
+
+    /**
+     * Create the task that writes the version file.
+     *
+     * @param project Project whose version is to be written
+     */
+    private void createVersionFileTask(final Project project) {
+        // Only write the file if this is the root project and "clean" is not the only task.
+        if (project.equals(project.getRootProject()) && isNotCleanOnly(project)) {
+            project.getTasks().register(VERSION_FILE_TASK_NAME, task -> {
+                final File buildDir = project.getLayout().getBuildDirectory().get().getAsFile();
+                final File projectVersionFile = new File(buildDir, PROJECT_VERSION_FILENAME);
+
+                // The project version file is the output
+                task.getOutputs().file(projectVersionFile);
+
+                // Build related files are the inputs.
+                project.getAllprojects().forEach(proj -> task.getInputs().file(proj.getBuildFile()));
+                BUILD_RELATED_FILES.forEach(filename -> {
+                    final File file = project.file(filename);
+                    if (file.exists()) {
+                        task.getInputs().file(file);
+                    }
+                });
+
+                // If "clean" is one of the tasks, generate the project version file after it has run
+                if (project.getTasks().findByName(BasePlugin.CLEAN_TASK_NAME) != null) {
+                    task.mustRunAfter(BasePlugin.CLEAN_TASK_NAME);
+                }
+
+                task.doLast(t -> {
+                    try {
+                        Files.writeString(projectVersionFile.toPath(),
+                                          project.getRootProject().getVersion().toString(),
+                                          StandardCharsets.UTF_8);
+                    } catch (final IOException ex) {
+                        throw new TaskExecutionException(task, ex);
+                    }
+                });
+            });
+
+            // Ensure that the task is always considered for execution.
+            final List<String> taskNames = new ArrayList<>(project.getGradle().getStartParameter().getTaskNames());
+            taskNames.add(VERSION_FILE_TASK_PATH);
+            project.getGradle().getStartParameter().setTaskNames(taskNames);
+        }
+    }
+
+    /**
+     * Creates the task to display the project version.
+     *
+     * @param project Project whose version is to be displayed
+     */
+    private void createVersionTask(final Project project) {
+        project.getTasks().register(VERSION_TASK_NAME, task -> {
+            task.setGroup("Help");
+            task.setDescription("Display project version number");
+            task.doFirst(t -> System.out.println(project.getVersion()));
+        });
+    }
+
+    /**
+     * Indicates whether the build will run more than just the 'clean' task.
+     *
+     * @param project  Root project to test for tasks
+     * @return {@code true} if the there are no tasks specified (i.e. use default tasks) or the tasks include more
+     *      than just "clean".
+     */
+    private static boolean isNotCleanOnly(final Project project) {
+        final List<String> taskNames = project.getGradle().getStartParameter().getTaskNames();
+        return taskNames.isEmpty()
+                || taskNames.stream().anyMatch(name -> !BasePlugin.CLEAN_TASK_NAME.equals(name));
     }
 }

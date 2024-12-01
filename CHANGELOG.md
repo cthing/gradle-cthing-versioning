@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+- The plugin now generates the text file `build/projectversion.txt` containing the
+  complete semantic version number of the plugin.
+
 ## [2.0.0] - 2024-10-26
  
 - The plugin has been migrated from JSR 305 to [JSpecify](https://jspecify.dev/) for `null` checking

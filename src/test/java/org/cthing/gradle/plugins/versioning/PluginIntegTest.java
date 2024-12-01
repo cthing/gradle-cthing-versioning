@@ -33,7 +33,7 @@ public class PluginIntegTest {
     public static Stream<Arguments> gradleVersionProvider() {
         return Stream.of(
                 arguments("8.0"),
-                arguments("8.10.2")
+                arguments("8.11.1")
         );
     }
 
@@ -72,11 +72,12 @@ public class PluginIntegTest {
                 version = ProjectVersion("1.2.3", BuildType.snapshot)
                 """);
 
-        final BuildResult result = createGradleRunner(gradleVersion).build();
+        final BuildResult result = createGradleRunner(gradleVersion, "version").build();
         final BuildTask versionTask = result.task(":version");
         assertThat(versionTask).isNotNull();
         assertThat(versionTask.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(result.getOutput()).contains("1.2.3");
+        assertThat(this.projectDir.resolve("build/projectversion.txt")).exists();
     }
 
     @ParameterizedTest
@@ -91,8 +92,9 @@ public class PluginIntegTest {
                 version = "1.2.3"
                 """);
 
-        final UnexpectedBuildFailure exception = catchThrowableOfType(UnexpectedBuildFailure.class,
-                                                                      () -> createGradleRunner(gradleVersion).build());
+        final UnexpectedBuildFailure exception =
+                catchThrowableOfType(UnexpectedBuildFailure.class,
+                                     () -> createGradleRunner(gradleVersion, "version").build());
         final BuildResult result = exception.getBuildResult();
         assertThat(result.getOutput()).contains("Version is not an instance of org.cthing.projectversion.ProjectVersion");
     }
@@ -130,16 +132,88 @@ public class PluginIntegTest {
                 }
                 """);
 
-        final UnexpectedBuildFailure exception = catchThrowableOfType(UnexpectedBuildFailure.class,
-                                                                      () -> createGradleRunner(gradleVersion).build());
+        final UnexpectedBuildFailure exception =
+                catchThrowableOfType(UnexpectedBuildFailure.class,
+                                     () -> createGradleRunner(gradleVersion, "version").build());
         final BuildResult result = exception.getBuildResult();
         assertThat(result.getOutput()).contains("Release build depends on snapshot artifact org.cthing:versionparser:4.+ (implementation)");
     }
 
-    private GradleRunner createGradleRunner(final String gradleVersion) {
+    @ParameterizedTest
+    @MethodSource("gradleVersionProvider")
+    public void testVersionFile(final String gradleVersion) throws IOException {
+        Files.writeString(this.projectDir.resolve("settings.gradle.kts"), "rootProject.name=\"test\"");
+        Files.writeString(this.projectDir.resolve("build.gradle.kts"), """
+                import org.cthing.projectversion.BuildType
+                import org.cthing.projectversion.ProjectVersion
+
+                repositories {
+                    mavenCentral()
+                }
+
+                plugins {
+                    id("org.cthing.cthing-versioning")
+                }
+
+                buildscript {
+                    repositories {
+                        mavenCentral()
+                    }
+                    dependencies {
+                        classpath("org.cthing:cthing-projectversion:1.0.0")
+                    }
+                }
+
+                version = ProjectVersion("1.2.3", BuildType.snapshot)
+                """);
+
+        final BuildResult result = createGradleRunner(gradleVersion, "projectVersionFile").build();
+        final BuildTask versionFileTask = result.task(":projectVersionFile");
+        assertThat(versionFileTask).isNotNull();
+        assertThat(versionFileTask.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(this.projectDir.resolve("build/projectversion.txt")).exists();
+    }
+
+    @ParameterizedTest
+    @MethodSource("gradleVersionProvider")
+    public void testVersionFileCleanOnly(final String gradleVersion) throws IOException {
+        Files.writeString(this.projectDir.resolve("settings.gradle.kts"), "rootProject.name=\"test\"");
+        Files.writeString(this.projectDir.resolve("build.gradle.kts"), """
+                import org.cthing.projectversion.BuildType
+                import org.cthing.projectversion.ProjectVersion
+
+                repositories {
+                    mavenCentral()
+                }
+
+                plugins {
+                    id("java")
+                    id("org.cthing.cthing-versioning")
+                }
+
+                buildscript {
+                    repositories {
+                        mavenCentral()
+                    }
+                    dependencies {
+                        classpath("org.cthing:cthing-projectversion:1.0.0")
+                    }
+                }
+
+                version = ProjectVersion("1.2.3", BuildType.snapshot)
+                """);
+
+        final BuildResult result = createGradleRunner(gradleVersion, "clean").build();
+        final BuildTask cleanTask = result.task(":clean");
+        assertThat(cleanTask).isNotNull();
+        assertThat(cleanTask.getOutcome()).isEqualTo(TaskOutcome.UP_TO_DATE);
+        assertThat(this.projectDir.resolve("build/projectversion.txt")).doesNotExist();
+    }
+
+    private GradleRunner createGradleRunner(final String gradleVersion, final String... arguments) {
         return GradleRunner.create()
                            .withProjectDir(this.projectDir.toFile())
-                           .withArguments("version")
+                           .withArguments(arguments)
                            .withPluginClasspath()
                            .withEnvironment(Map.of("CTHING_CI", "true"))
                            .withGradleVersion(gradleVersion);
