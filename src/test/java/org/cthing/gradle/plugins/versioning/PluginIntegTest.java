@@ -16,6 +16,7 @@ import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
+import org.gradle.util.GradleVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,7 +34,7 @@ public class PluginIntegTest {
     public static Stream<Arguments> gradleVersionProvider() {
         return Stream.of(
                 arguments("8.0"),
-                arguments("8.11.1")
+                arguments(GradleVersion.current().getVersion())
         );
     }
 
