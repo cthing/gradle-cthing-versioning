@@ -76,7 +76,7 @@ public class PluginIntegTest {
         final BuildResult result = createGradleRunner(gradleVersion, "version").build();
         final BuildTask versionTask = result.task(":version");
         assertThat(versionTask).isNotNull();
-        assertThat(versionTask.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(versionTask.getOutcome()).as(result.getOutput()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(result.getOutput()).contains("1.2.3");
         assertThat(this.projectDir.resolve("build/projectversion.txt")).exists();
     }
@@ -171,7 +171,7 @@ public class PluginIntegTest {
         final BuildResult result = createGradleRunner(gradleVersion, "projectVersionFile").build();
         final BuildTask versionFileTask = result.task(":projectVersionFile");
         assertThat(versionFileTask).isNotNull();
-        assertThat(versionFileTask.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(versionFileTask.getOutcome()).as(result.getOutput()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(this.projectDir.resolve("build/projectversion.txt")).exists();
     }
 
@@ -207,7 +207,7 @@ public class PluginIntegTest {
         final BuildResult result = createGradleRunner(gradleVersion, "clean").build();
         final BuildTask cleanTask = result.task(":clean");
         assertThat(cleanTask).isNotNull();
-        assertThat(cleanTask.getOutcome()).isEqualTo(TaskOutcome.UP_TO_DATE);
+        assertThat(cleanTask.getOutcome()).as(result.getOutput()).isEqualTo(TaskOutcome.UP_TO_DATE);
         assertThat(this.projectDir.resolve("build/projectversion.txt")).doesNotExist();
     }
 
