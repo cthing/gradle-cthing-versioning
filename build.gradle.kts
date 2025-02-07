@@ -59,6 +59,17 @@ gradlePlugin {
 //
 // This project is a dependency of all C Thing Software projects. Therefore, to avoid circular
 // dependencies, the only C Thing Software project it should depend on is cthing-projectversion.
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "com.cthing"
+                    || (requested.group == "org.cthing" && requested.name != "cthing-projectversion")) {
+                throw GradleException("A dependency on '${requested.group}:${requested.name}' is prohibited.")
+            }
+        }
+    }
+}
+
 dependencies {
     api(libs.cthingProjectVersion)
 
@@ -200,6 +211,50 @@ tasks {
 }
 
 publishing {
+    publications {
+        maybeCreate("pluginMaven", MavenPublication::class.java).pom {
+            name = project.name
+            description = project.description
+            url = "https://github.com/cthing/${project.name}"
+            organization {
+                name = "C Thing Software"
+                url = "https://www.cthing.com"
+            }
+            licenses {
+                license {
+                    name = "Apache-2.0"
+                    url = "https://www.apache.org/licenses/LICENSE-2.0"
+                }
+            }
+            developers {
+                developer {
+                    id = "baron"
+                    name = "Baron Roberts"
+                    email = "baron@cthing.com"
+                    organization = "C Thing Software"
+                    organizationUrl = "https://www.cthing.com"
+                }
+            }
+            scm {
+                connection = "scm:git:https://github.com/cthing/${project.name}.git"
+                developerConnection = "scm:git:git@github.com:cthing/${project.name}.git"
+                url = "https://github.com/cthing/${project.name}"
+            }
+            issueManagement {
+                system = "GitHub Issues"
+                url = "https://github.com/cthing/${project.name}/issues"
+            }
+            ciManagement {
+                url = "https://github.com/cthing/${project.name}/actions"
+                system = "GitHub Actions"
+            }
+            properties.putAll(mapOf("cthing.build.date" to (project.version as ProjectVersion).buildDate,
+                                    "cthing.build.number" to (project.version as ProjectVersion).buildNumber,
+                                    "cthing.dependencies" to libs.cthingProjectVersion.get().toString(),
+                                    "cthing.gradle.plugins" to gradlePlugin.plugins["cthingVersioningPlugin"].id))
+        }
+    }
+
     val repoUrl = if ((version as ProjectVersion).isSnapshotBuild)
         findProperty("cthing.nexus.snapshotsUrl") else findProperty("cthing.nexus.candidatesUrl")
     if (repoUrl != null) {
