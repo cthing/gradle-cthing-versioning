@@ -45,13 +45,13 @@ gradlePlugin {
     vcsUrl = "https://github.com/cthing/gradle-cthing-versioning"
 
     plugins {
-        create("cthingVersioningPlugin") {
+        create("cthingVersioningPlugin", Action {
             id = "org.cthing.cthing-versioning"
             displayName = "C Thing Software versioning plugin"
             description = "A Gradle plugin that establishes the versioning scheme for C Thing Software projects."
             tags = listOf("versioning")
             implementationClass = "org.cthing.gradle.plugins.versioning.VersioningPlugin"
-        }
+        })
     }
 }
 
