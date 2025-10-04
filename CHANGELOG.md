@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [3.1.0] - 2025-10-04
+
+### Changed
+
+- Plugin configuration can now be cached
+
 ## [3.0.0] - 2024-12-01
 
 ### Added
@@ -30,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release
 
-[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/3.0.0...HEAD
+[unreleased]: https://github.com/cthing/gradle-cthing-versioning/compare/3.1.0...HEAD
+[3.1.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/3.1.0
 [3.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/3.0.0
 [2.0.0]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/2.0.0
 [1.0.1]: https://github.com/cthing/gradle-cthing-versioning/releases/tag/1.0.1
